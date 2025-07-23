@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriLocal - AI Farming Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide-react@0.292.0/dist/lucide-react.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .modal {
+            transition: opacity 0.25s ease;
+        }
+        .modal-content {
+            transition: transform 0.25s ease;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #f0fff4, #e6fffa);
+        }
+    </style>
+</head>
+<body class="gradient-bg text-gray-800">
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
+
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-center bg-white/60 backdrop-blur-sm p-4 rounded-xl shadow-md border border-gray-200">
+                <div>
+                    <h1 class="text-3xl font-bold text-green-800">AgriLocal (कृषीलोकल)</h1>
+                    <p class="text-gray-600">Your AI-Powered Agricultural Assistant</p>
+                </div>
+                <div class="text-right mt-4 md:mt-0 bg-green-50 p-3 rounded-lg border border-green-200">
+                    <p class="font-semibold">👨‍🌾 Ramesh Patil (रमेश पाटील)</p>
+                    <p class="text-sm text-gray-600">📍 Ratnagiri, Konkan</p>
+                    <p class="text-sm text-gray-600">🏢 Konkan Vikas FPO</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Grid -->
+        <main class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <!-- Weather Card -->
+            <div id="weather-card" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
+                <div class="bg-blue-100 p-4 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-1">Weather Forecast</h2>
+                <h3 class="text-lg text-green-700 font-semibold">हवामान अंदाज</h3>
+                <p class="text-gray-500 mt-2">Hyper-local weather predictions and alerts for your farm.</p>
+            </div>
+
+            <!-- Pest Diagnosis Card -->
+            <div id="pest-card" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
+                <div class="bg-red-100 p-4 rounded-full mb-4">
+                     <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-1">Pest/Disease Diagnosis</h2>
+                <h3 class="text-lg text-green-700 font-semibold">कीड/रोग निदान</h3>
+                <p class="text-gray-500 mt-2">Upload a photo of a leaf to identify pests and diseases instantly.</p>
+            </div>
+
+            <!-- Soil Health Card -->
+            <div id="soil-card" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
+                <div class="bg-yellow-600/20 p-4 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-yellow-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zM12 8v.01M12 16v.01"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-1">Soil Health Analytics</h2>
+                <h3 class="text-lg text-green-700 font-semibold">माती आरोग्य विश्लेषण</h3>
+                <p class="text-gray-500 mt-2">Get nutrient recommendations tailored to your crop and soil type.</p>
+            </div>
+
+            <!-- Irrigation Card -->
+            <div id="irrigation-card" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
+                <div class="bg-cyan-100 p-4 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zM12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-1">Irrigation Management</h2>
+                <h3 class="text-lg text-green-700 font-semibold">सिंचन व्यवस्थापन</h3>
+                <p class="text-gray-500 mt-2">Receive smart irrigation schedules to save water and improve yield.</p>
+            </div>
+
+            <!-- Market Prices Card -->
+            <div id="market-card" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
+                <div class="bg-purple-100 p-4 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8h6m-5 4h4m5 4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-1">Market Prices</h2>
+                <h3 class="text-lg text-green-700 font-semibold">बाजार भाव</h3>
+                <p class="text-gray-500 mt-2">Check real-time market prices and 7-day forecasts for your crops.</p>
+            </div>
+
+            <!-- Drone Service Card -->
+            <div id="drone-card" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
+                <div class="bg-orange-100 p-4 rounded-full mb-4">
+                    <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-1.5-3-1-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.3-.8.8l1.8 8.4.1.2c.2.8 1 1.4 1.9 1.4h8.5c.9 0 1.7-.5 1.9-1.4l.1-.2zM12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M16 11h2"></path></svg>
+                </div>
+                <h2 class="text-xl font-bold mb-1">Book Drone Service</h2>
+                <h3 class="text-lg text-green-700 font-semibold">ड्रोन सेवा बुकिंग</h3>
+                <p class="text-gray-500 mt-2">Book a drone for spraying or crop health surveys on a pay-per-use basis.</p>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden opacity-0">
+        <div id="modal-content" class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-2xl transform scale-95">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-5 border-b border-gray-200">
+                <h3 id="modal-title" class="text-2xl font-bold text-gray-800">Modal Title</h3>
+                <button id="modal-close" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div id="modal-body" class="p-6 max-h-[70vh] overflow-y-auto">
+                <!-- Content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Simulated User Data & Backend ---
+        const user = {
+            name: "Ramesh Patil",
+            location: "Ratnagiri, Konkan",
+            fpo: "Konkan Vikas FPO",
+            gps_coords: (16.99, 73.31),
+            crops: ["Paddy (भात)", "Alphonso Mango (हापूस आंबा)", "Cashew (काजू)"]
+        };
+
+        const SimulatedWeatherAPI = {
+            get_forecast(gps_coords) {
+                const alerts = ["Clear skies for the next 48 hours. Ideal for harvesting.", "Warning: High humidity may increase fungal risk for mangoes.", "Expect strong winds. Secure any loose structures."];
+                return {
+                    "Temperature": `${Math.floor(Math.random() * 8) + 28}°C`,
+                    "Humidity": `${Math.floor(Math.random() * 26) + 60}%`,
+                    "Precipitation Chance (48h)": `${Math.floor(Math.random() * 81) + 10}%`,
+                    "Wind Speed": `${Math.floor(Math.random() * 11) + 5} km/h`,
+                    "Alert": alerts[Math.floor(Math.random() * alerts.length)]
+                };
+            }
+        };
+
+        const SimulatedPestDiagnosisModel = {
+            analyze_image(image_path, crop_type) {
+                const diseases = ["Healthy", "Thrips (थ्रिप्स)", "Powdery Mildew (भुरी)", "Sooty Mould (काळी बुरशी)"];
+                const diagnosis = diseases[Math.floor(Math.random() * diseases.length)];
+                if (diagnosis === "Healthy") {
+                    return {
+                        "Diagnosis": "Healthy (निरोगी)",
+                        "Confidence": "98.7%",
+                        "Recommendation": "No action needed. Continue regular monitoring."
+                    };
+                } else {
+                    return {
+                        "Diagnosis": `${diagnosis}`,
+                        "Confidence": `${Math.floor(Math.random() * 15) + 85}%`,
+                        "Recommendation": `Apply targeted organic pesticide for ${diagnosis}. Reduce pesticide usage by an estimated 40% with this targeted approach.`
+                    };
+                }
+            }
+        };
+        
+        const SimulatedSoilHealthModel = {
+            get_recommendations(gps_coords, crop_type) {
+                return {
+                    "Soil Type": "Lateritic (जांभी मृदा)",
+                    "pH": (Math.random() * (6.5 - 5.5) + 5.5).toFixed(1),
+                    "Deficiencies": "Nitrogen, Zinc",
+                    "Recommendation": `For ${crop_type}, apply 50kg/ha of Urea and 10kg/ha of Zinc Sulphate. Consider adding 5 tons/ha of farmyard manure to improve long-term soil health.`
+                };
+            }
+        };
+        
+        const SimulatedWaterManagementModel = {
+            get_irrigation_schedule(crop_type, crop_stage) {
+                const nextIrrigationDate = new Date();
+                nextIrrigationDate.setDate(nextIrrigationDate.getDate() + 2);
+                return {
+                    "Schedule": "Irrigate for 30 minutes every 3 days using drip system.",
+                    "Water Saved Estimate": "35%",
+                    "Next Irrigation": nextIrrigationDate.toISOString().split('T')[0]
+                };
+            }
+        };
+
+        const SimulatedMarketAPI = {
+            get_prices(crop_type) {
+                 return {
+                    "Crop": crop_type,
+                    "Avg Price (Pune APMC)": `₹${Math.floor(Math.random() * 501) + 2000} / quintal`,
+                    "Avg Price (Mumbai APMC)": `₹${Math.floor(Math.random() * 501) + 2100} / quintal`,
+                    "Forecast (7 days)": "Prices expected to remain stable with a slight upward trend due to festive demand."
+                };
+            }
+        };
+
+        // --- Modal Control ---
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        const modalClose = document.getElementById('modal-close');
+
+        function openModal() {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modalBody.innerHTML = ''; // Clear content on close
+            }, 250);
+        }
+
+        modalClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // --- UI Rendering Functions ---
+        function renderKeyValue(data) {
+            let html = '<div class="space-y-4">';
+            for (const [key, value] of Object.entries(data)) {
+                html += `
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <p class="font-semibold text-gray-500 text-sm">${key.replace(/_/g, ' ')}</p>
+                        <p class="text-lg font-medium text-gray-800">${value}</p>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            return html;
+        }
+
+        function createSelectionForm(title, items, submitCallback) {
+            let optionsHtml = items.map((item, index) => `<option value="${index}">${item}</option>`).join('');
+            
+            modalTitle.innerText = title;
+            modalBody.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-gray-600">Please select a crop to get started.</p>
+                    <select id="crop-selector" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        ${optionsHtml}
+                    </select>
+                    <div id="additional-inputs"></div>
+                    <button id="form-submit-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">Get Report</button>
+                </div>
+            `;
+            openModal();
+
+            const submitBtn = document.getElementById('form-submit-btn');
+            submitBtn.addEventListener('click', () => {
+                const selector = document.getElementById('crop-selector');
+                const selectedIndex = selector.value;
+                const selectedCrop = items[selectedIndex];
+                submitCallback(selectedCrop);
+            });
+            
+            return document.getElementById('additional-inputs');
+        }
+
+        // --- Event Handlers ---
+        document.getElementById('weather-card').addEventListener('click', () => {
+            modalTitle.innerText = 'Hyper-Local Weather Report';
+            const forecast = SimulatedWeatherAPI.get_forecast(user.gps_coords);
+            modalBody.innerHTML = renderKeyValue(forecast);
+            openModal();
+        });
+
+        document.getElementById('pest-card').addEventListener('click', () => {
+            const additionalInputsContainer = createSelectionForm('Pest/Disease Diagnosis', user.crops, (selectedCrop) => {
+                const imagePath = document.getElementById('image-path-input').value || 'photo.jpg';
+                const result = SimulatedPestDiagnosisModel.analyze_image(imagePath, selectedCrop);
+                modalTitle.innerText = 'Diagnosis Report';
+                modalBody.innerHTML = renderKeyValue(result);
+            });
+            additionalInputsContainer.innerHTML = `
+                <label for="image-path-input" class="block text-sm font-medium text-gray-700 mt-4">Simulate Image Upload:</label>
+                <input type="text" id="image-path-input" placeholder="/sdcard/DCIM/photo.jpg" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                <p class="text-xs text-gray-500 mt-1">In a real app, this would be a file upload button.</p>
+            `;
+        });
+        
+        document.getElementById('soil-card').addEventListener('click', () => {
+            createSelectionForm('Soil Health Analytics', user.crops, (selectedCrop) => {
+                const result = SimulatedSoilHealthModel.get_recommendations(user.gps_coords, selectedCrop);
+                modalTitle.innerText = 'Soil Health Report';
+                modalBody.innerHTML = renderKeyValue(result);
+            });
+        });
+
+        document.getElementById('irrigation-card').addEventListener('click', () => {
+            const additionalInputsContainer = createSelectionForm('Irrigation Management', user.crops, (selectedCrop) => {
+                const stage = document.getElementById('crop-stage-input').value || 'vegetative';
+                const result = SimulatedWaterManagementModel.get_irrigation_schedule(selectedCrop, stage);
+                modalTitle.innerText = 'Smart Irrigation Plan';
+                modalBody.innerHTML = renderKeyValue(result);
+            });
+            additionalInputsContainer.innerHTML = `
+                <label for="crop-stage-input" class="block text-sm font-medium text-gray-700 mt-4">Enter Crop Stage:</label>
+                <input type="text" id="crop-stage-input" placeholder="e.g., vegetative, flowering" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+            `;
+        });
+
+        document.getElementById('market-card').addEventListener('click', () => {
+            createSelectionForm('Market Prices & Forecast', user.crops, (selectedCrop) => {
+                const result = SimulatedMarketAPI.get_prices(selectedCrop);
+                modalTitle.innerText = 'Market Intelligence Report';
+                modalBody.innerHTML = renderKeyValue(result);
+            });
+        });
+
+        document.getElementById('drone-card').addEventListener('click', () => {
+            modalTitle.innerText = 'Book Drone-as-a-Service';
+            modalBody.innerHTML = `
+                <div class="space-y-4">
+                    <p class="text-gray-600">Select a service and enter the area to book.</p>
+                    <select id="service-selector" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <option value="1">Aerial Crop Health Survey (Multispectral)</option>
+                        <option value="2">Precision Pesticide Spraying</option>
+                        <option value="3">Precision Fertilizer Spraying</option>
+                    </select>
+                    <input type="number" id="area-input" placeholder="Enter area in acres" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                    <button id="book-drone-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">Confirm Booking</button>
+                    <div id="booking-confirmation" class="hidden mt-4 p-4 bg-blue-50 text-blue-800 border border-blue-200 rounded-lg"></div>
+                </div>
+            `;
+            openModal();
+
+            document.getElementById('book-drone-btn').addEventListener('click', () => {
+                const area = document.getElementById('area-input').value;
+                const serviceSelector = document.getElementById('service-selector');
+                const serviceName = serviceSelector.options[serviceSelector.selectedIndex].text;
+                const confirmationDiv = document.getElementById('booking-confirmation');
+
+                if (area && parseFloat(area) > 0) {
+                    confirmationDiv.innerHTML = `
+                        <h4 class="font-bold">Booking Confirmed!</h4>
+                        <p>Service: <strong>${serviceName}</strong> for <strong>${area} acres</strong>.</p>
+                        <p class="mt-2">A local DaaS provider from your FPO network will contact you within 24 hours. This pay-per-use model avoids high hardware costs.</p>
+                    `;
+                    confirmationDiv.classList.remove('hidden');
+                } else {
+                    confirmationDiv.innerHTML = '<p class="text-red-600">Please enter a valid area.</p>';
+                    confirmationDiv.classList.remove('hidden');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
