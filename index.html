@@ -5,211 +5,758 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgriLocal - AI Farming Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide-react@0.292.0/dist/lucide-react.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-image-url: url('https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?q=80&w=2070&auto=format&fit=crop');
+            --primary-green: #6B8E23; /* Olive Drab */
+            --dark-green: #2F4F4F;   /* Dark Slate Gray */
+            --light-parchment: #fdfdf5;
+            --dark-overlay: rgba(15, 23, 42, 0.7); /* Slate-900 with opacity */
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
+            font-weight: 400;
+            background-color: #0f172a; /* Fallback color */
+            color: var(--light-parchment);
         }
+        
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-image: var(--bg-image-url);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            z-index: -2;
+        }
+
+        .background-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark-overlay);
+            backdrop-filter: blur(4px);
+            z-index: -1;
+        }
+
+        h1, h2, h3, #modal-title {
+            font-family: 'Poppins', serif;
+            font-weight: 600;
+        }
+        
+        .logo-title {
+             font-family: 'Poppins', serif;
+             font-weight: 600;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+        
         .modal {
-            transition: opacity 0.25s ease;
+            transition: opacity 0.3s ease;
         }
         .modal-content {
-            transition: transform 0.25s ease;
+             background: rgba(30, 41, 59, 0.8); /* Slate-800 */
+             border-radius: 1rem;
+             border: 1px solid rgba(255, 255, 255, 0.1);
+             backdrop-filter: blur(15px);
+             -webkit-backdrop-filter: blur(15px);
+             transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        .gradient-bg {
-            background: linear-gradient(135deg, #f0fff4, #e6fffa);
+
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top: 4px solid var(--primary-green);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden { display: none; }
+
+        .form-input {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.75rem 1rem;
+            width: 100%;
+            transition: all 0.2s ease-in-out;
+            color: var(--light-parchment);
+            font-family: 'Inter', sans-serif;
+        }
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .form-input:focus {
+            outline: 2px solid transparent;
+            outline-offset: 2px;
+            border-color: var(--primary-green);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            padding: 0.5rem 1.25rem;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-green);
+            color: white;
+            box-shadow: 0 4px 15px rgba(107, 142, 35, 0.3);
+        }
+        .btn-primary:hover {
+            background-color: #8FBC8F; /* Dark Sea Green */
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-ghost {
+            background-color: transparent;
+            color: var(--light-parchment);
+            border: 1px solid var(--light-parchment);
+        }
+        .btn-ghost:hover {
+            background-color: var(--primary-green);
+            color: white;
+            border-color: var(--primary-green);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 142, 35, 0.3);
+        }
+        
+        .prose-output {
+            color: #d1d5db; /* text-gray-300 */
+        }
+        .prose-output h1, .prose-output h2, .prose-output h3, .prose-output h4 {
+            color: #ffffff;
+            font-family: 'Poppins', serif;
+            margin-bottom: 0.75rem;
+        }
+        .prose-output strong {
+            color: #fdfdf5;
+            font-weight: 600;
+        }
+        .prose-output ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+        }
+        .prose-output li {
+            margin-bottom: 0.5rem;
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slideInUp {
+            animation: slideInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        #language-switcher {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            z-index: 50;
+        }
+        .lang-btn-container {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+            border-radius: 9999px; border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            padding: 0.25rem; display: flex; gap: 0.25rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .lang-btn {
+            padding: 0.5rem 1.25rem; border-radius: 9999px;
+            font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 0.875rem;
+            transition: all 0.3s ease; color: rgba(255, 255, 255, 0.6); background-color: transparent;
+        }
+        .lang-btn.active {
+            background-color: rgba(255, 255, 255, 0.9); color: #0f172a;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            transition: all 0.3s ease-in-out;
+        }
+        header.scrolled {
+            background-color: rgba(17, 24, 39, 0.8); /* gray-900 with opacity */
+            backdrop-filter: blur(4px); 
+            -webkit-backdrop-filter: blur(4px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        /* NEW: Scroll animation styles */
+        .revealable {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s ease-out, transform 0.6s ease-out;
+        }
+        .revealable.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
-<body class="gradient-bg text-gray-800">
+<body>
+    <div class="background-container"></div>
+    <div class="background-overlay"></div>
 
-    <!-- Main Container -->
-    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
-
+    <div class="relative min-h-screen">
         <!-- Header -->
-        <header class="mb-8">
-            <div class="flex flex-col md:flex-row justify-between items-center bg-white/60 backdrop-blur-sm p-4 rounded-xl shadow-md border border-gray-200">
-                <div>
-                    <h1 class="text-3xl font-bold text-green-800">AgriLocal (कृषीलोकल)</h1>
-                    <p class="text-gray-600">Your AI-Powered Agricultural Assistant</p>
+        <header id="main-header" class="py-3"> 
+            <nav class="flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center gap-3">
+                    <svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M50 2.5C30.4 2.5 15 18.3 15 38c0 14.9 16.2 36.5 31.1 53.4.9 1 2.3 1.5 3.7 1.5s2.8-.5 3.7-1.5C68.8 74.5 85 52.9 85 38c0-19.7-15.4-35.5-35-35.5z" fill="rgba(255, 255, 255, 0.1)" stroke="rgba(255, 255, 255, 0.2)" stroke-width="1.5"/>
+                        <path d="M50 15c-12.7 0-23 10.3-23 23 0 7.5 3.6 14.1 9.2 18.4.6.4 1.3.6 2 .6 1.1 0 2.2-.6 2.8-1.7 3.3-6.1 3.2-14.7-.3-21.7C37.9 26.2 43.6 22 50 22c5.5 0 10.4 3.4 12.6 8.4 1.4 3.3 1.4 7.2 0 10.6-.6 1.2.1 2.6 1.3 3.2 1.2.6 2.6-.1 3.2-1.3 3.2-6.5 3.1-14.4-.3-20.9C63.6 18.5 57.2 15 50 15z" fill="var(--primary-green)"/>
+                    </svg>
+                    <span class="text-2xl font-semibold logo-title text-white">AgriLocal</span>
                 </div>
-                <div class="text-right mt-4 md:mt-0 bg-green-50 p-3 rounded-lg border border-green-200">
-                    <p class="font-semibold">👨‍🌾 Ramesh Patil (रमेश पाटील)</p>
-                    <p class="text-sm text-gray-600">📍 Ratnagiri, Konkan</p>
-                    <p class="text-sm text-gray-600">🏢 Konkan Vikas FPO</p>
-                </div>
-            </div>
+                 <div class="flex items-center gap-4">
+                    <a href="#about-us" id="about-us-btn" class="text-white hover:text-green-300 transition-colors font-medium" data-lang-key="aboutUs">About Us</a>
+                    <button id="get-started-btn" class="btn btn-ghost" data-lang-key="getStarted">Get Started</button>
+                    <button id="profile-btn" class="btn btn-ghost hidden" data-lang-key="profile">Profile</button>
+                 </div>
+            </nav>
         </header>
 
-        <!-- Main Dashboard Grid -->
-        <main class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            <!-- Weather Card -->
-            <div id="weather-card" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
-                <div class="bg-blue-100 p-4 rounded-full mb-4">
-                    <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path></svg>
+        <!-- Main Content -->
+        <div id="landing-page" class="px-4 sm:px-6 lg:px-8">
+            <main class="max-w-7xl mx-auto pt-32 sm:pt-48 text-center min-h-[80vh] flex flex-col justify-center items-center">
+                 <h1 class="text-4xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-white animate-slideInUp" style="animation-delay: 0.1s;" data-lang-key="mainTitle">
+                    Cultivating Insight, <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-green-400 to-green-500">Harvesting Success.</span>
+                </h1>
+                <p class="mt-6 max-w-2xl mx-auto text-lg text-gray-300 animate-slideInUp font-light" style="animation-delay: 0.3s;" data-lang-key="mainSubtitle">
+                    AgriLocal is your AI co-pilot for the field. We combine satellite imagery with advanced AI to give you precise, actionable advice for your crops, right when you need it.
+                </p>
+            </main>
+
+            <!-- Features Section -->
+            <section id="features" class="py-24">
+                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10 relative">
+                    <div class="text-center">
+                         <h2 class="text-4xl font-bold text-white mb-12 revealable" data-lang-key="featuresTitle">Your All-in-One Farming Toolkit</h2>
+                    </div>
+                    <div class="mt-16 space-y-20">
+                        <!-- Feature 1 -->
+                        <div class="grid md:grid-cols-2 gap-12 items-center">
+                            <div class="revealable">
+                                <h3 class="text-3xl font-bold text-green-300" data-lang-key="cardPlantingTitle">Planting Advisor</h3>
+                                <p class="mt-4 text-lg text-gray-300 font-light" data-lang-key="featurePlantingText">Get hyper-local, AI-driven recommendations on the perfect time to plant your crops, maximizing potential yield and minimizing climate-related risks.</p>
+                            </div>
+                            <div class="revealable" style="transition-delay: 0.2s;">
+                               <img src="https://images.unsplash.com/photo-1492496913980-50133821932d?q=80&w=1887&auto=format&fit=crop" alt="Lush green seedlings" class="rounded-2xl shadow-2xl">
+                            </div>
+                        </div>
+                        <!-- Feature 2 -->
+                         <div class="grid md:grid-cols-2 gap-12 items-center">
+                            <div class="md:order-2 revealable">
+                                <h3 class="text-3xl font-bold text-blue-300" data-lang-key="cardIrrigationTitle">Smart Irrigation</h3>
+                                <p class="mt-4 text-lg text-gray-300 font-light" data-lang-key="featureIrrigationText">Based on real-time weather data and satellite analysis, our AI generates precise watering schedules to save water and ensure your crops are never thirsty.</p>
+                            </div>
+                            <div class="md:order-1 revealable" style="transition-delay: 0.2s;">
+                               <img src="https://images.unsplash.com/photo-1587590227214-82ab42d36210?q=80&w=1954&auto=format&fit=crop" alt="Watering a field" class="rounded-2xl shadow-2xl">
+                            </div>
+                        </div>
+                         <!-- Feature 3 -->
+                        <div class="grid md:grid-cols-2 gap-12 items-center">
+                            <div class="revealable">
+                                <h3 class="text-3xl font-bold text-red-400" data-lang-key="cardPestTitle">Pest Diagnosis</h3>
+                                <p class="mt-4 text-lg text-gray-300 font-light" data-lang-key="featurePestText">Upload a photo of an affected leaf, and our AI will diagnose the issue, providing immediate, actionable treatment plans to protect your harvest.</p>
+                            </div>
+                            <div class="revealable" style="transition-delay: 0.2s;">
+                               <img src="https://images.unsplash.com/photo-1627923227318-20a25943642d?q=80&w=1887&auto=format&fit=crop" alt="Close up of a watermelon on the vine" class="rounded-2xl shadow-2xl">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <h2 class="text-xl font-bold mb-1">Weather Forecast</h2>
-                <h3 class="text-lg text-green-700 font-semibold">हवामान अंदाज</h3>
-                <p class="text-gray-500 mt-2">Hyper-local weather predictions and alerts for your farm.</p>
-            </div>
+            </section>
 
-            <!-- Pest Diagnosis Card -->
-            <div id="pest-card" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
-                <div class="bg-red-100 p-4 rounded-full mb-4">
-                     <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <!-- About Us Section -->
+            <section id="about-us" class="py-24">
+                <div class="max-w-4xl mx-auto text-center">
+                    <h2 class="text-4xl font-bold text-white mb-6 revealable" data-lang-key="aboutTitle">About AgriLocal</h2>
+                    <p class="text-lg text-gray-300 font-light revealable" style="transition-delay: 0.2s;" data-lang-key="aboutText">
+                        AgriLocal was born from a simple mission: to empower local farmers with the same advanced technology used by large agricultural corporations. We believe that by providing accessible, AI-driven insights, we can help build a more sustainable and profitable future for the farming communities that feed us all. Our platform is designed to be intuitive, hyper-local, and a true partner in your daily work.
+                    </p>
                 </div>
-                <h2 class="text-xl font-bold mb-1">Pest/Disease Diagnosis</h2>
-                <h3 class="text-lg text-green-700 font-semibold">कीड/रोग निदान</h3>
-                <p class="text-gray-500 mt-2">Upload a photo of a leaf to identify pests and diseases instantly.</p>
-            </div>
+            </section>
+        </div>
 
-            <!-- Soil Health Card -->
-            <div id="soil-card" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
-                <div class="bg-yellow-600/20 p-4 rounded-full mb-4">
-                    <svg class="w-8 h-8 text-yellow-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zM12 8v.01M12 16v.01"></path></svg>
+        <!-- App Dashboard (Initially Hidden) -->
+        <div id="app-container" class="max-w-7xl mx-auto hidden pt-32 px-4 sm:px-6 lg:px-8">
+            <div id="user-greeting" class="text-center mb-12"></div>
+            <div id="dashboard-content">
+                <h2 class="text-3xl font-bold text-center text-white mb-8" data-lang-key="dashboardTitle">Your Farm Dashboard</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Cards injected here -->
                 </div>
-                <h2 class="text-xl font-bold mb-1">Soil Health Analytics</h2>
-                <h3 class="text-lg text-green-700 font-semibold">माती आरोग्य विश्लेषण</h3>
-                <p class="text-gray-500 mt-2">Get nutrient recommendations tailored to your crop and soil type.</p>
-            </div>
-
-            <!-- Irrigation Card -->
-            <div id="irrigation-card" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
-                <div class="bg-cyan-100 p-4 rounded-full mb-4">
-                    <svg class="w-8 h-8 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zM12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg>
-                </div>
-                <h2 class="text-xl font-bold mb-1">Irrigation Management</h2>
-                <h3 class="text-lg text-green-700 font-semibold">सिंचन व्यवस्थापन</h3>
-                <p class="text-gray-500 mt-2">Receive smart irrigation schedules to save water and improve yield.</p>
-            </div>
-
-            <!-- Market Prices Card -->
-            <div id="market-card" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
-                <div class="bg-purple-100 p-4 rounded-full mb-4">
-                    <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8h6m-5 4h4m5 4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2z"></path></svg>
-                </div>
-                <h2 class="text-xl font-bold mb-1">Market Prices</h2>
-                <h3 class="text-lg text-green-700 font-semibold">बाजार भाव</h3>
-                <p class="text-gray-500 mt-2">Check real-time market prices and 7-day forecasts for your crops.</p>
-            </div>
-
-            <!-- Drone Service Card -->
-            <div id="drone-card" class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer flex flex-col items-center text-center">
-                <div class="bg-orange-100 p-4 rounded-full mb-4">
-                    <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-1.5-3-1-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.3-.8.8l1.8 8.4.1.2c.2.8 1 1.4 1.9 1.4h8.5c.9 0 1.7-.5 1.9-1.4l.1-.2zM12 13a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"></path><path d="M16 11h2"></path></svg>
-                </div>
-                <h2 class="text-xl font-bold mb-1">Book Drone Service</h2>
-                <h3 class="text-lg text-green-700 font-semibold">ड्रोन सेवा बुकिंग</h3>
-                <p class="text-gray-500 mt-2">Book a drone for spraying or crop health surveys on a pay-per-use basis.</p>
-            </div>
-        </main>
-
-    </div>
-
-    <!-- Modal Structure -->
-    <div id="modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 hidden opacity-0">
-        <div id="modal-content" class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-2xl transform scale-95">
-            <!-- Modal Header -->
-            <div class="flex justify-between items-center p-5 border-b border-gray-200">
-                <h3 id="modal-title" class="text-2xl font-bold text-gray-800">Modal Title</h3>
-                <button id="modal-close" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <!-- Modal Body -->
-            <div id="modal-body" class="p-6 max-h-[70vh] overflow-y-auto">
-                <!-- Content will be injected here -->
+                
+                <section class="mt-12 glass-card p-6">
+                     <h2 class="text-2xl font-bold mb-4 text-center text-white" data-lang-key="satelliteTitle">Satellite Farm Overview</h2>
+                     <div class="flex flex-col md:flex-row items-center gap-6">
+                        <div class="w-full md:w-2/3 h-64 bg-gray-800 rounded-lg">
+                            <img src="https://placehold.co/600x400/0f172a/6B8E23?text=Satellite+View" alt="Satellite view of a farm" class="w-full h-full object-cover rounded-lg">
+                        </div>
+                        <div id="satellite-analysis" class="w-full md:w-1/3">
+                            <!-- Satellite analysis injected here -->
+                        </div>
+                     </div>
+                </section>
             </div>
         </div>
     </div>
 
+
+    <!-- Modal Structure (for Profile and Features) -->
+    <div id="modal" class="modal fixed inset-0 z-[101] flex items-center justify-center p-4 hidden opacity-0">
+        <div class="fixed inset-0 bg-black/50" id="modal-backdrop"></div>
+        <div id="modal-content" class="modal-content w-full max-w-2xl transform scale-95 z-10">
+            <div class="flex justify-between items-center p-5 border-b border-white/10">
+                <h3 id="modal-title" class="text-2xl font-bold text-white">Modal Title</h3>
+                <button id="modal-close" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div id="modal-body" class="p-6 max-h-[70vh] overflow-y-auto"></div>
+        </div>
+    </div>
+    
+    <!-- Language Switcher -->
+    <div id="language-switcher" class="lang-btn-container">
+        <button id="lang-en" class="lang-btn active">English</button>
+        <button id="lang-mr" class="lang-btn">मराठी</button>
+    </div>
+
     <script>
-        // --- Simulated User Data & Backend ---
-        const user = {
-            name: "Ramesh Patil",
-            location: "Ratnagiri, Konkan",
-            fpo: "Konkan Vikas FPO",
-            gps_coords: (16.99, 73.31),
-            crops: ["Paddy (भात)", "Alphonso Mango (हापूस आंबा)", "Cashew (काजू)"]
-        };
+        // --- App State & Configuration ---
+        const user = {};
+        let currentLang = 'en';
+        const GEMINI_API_KEY = "AIzaSyDF6Cn_RlH_IG6owGnwYN_l0VPCfweYNt0"; 
+        const WEATHER_API_KEY = "e55e04a5803e45a689c134510252407";
 
-        const SimulatedWeatherAPI = {
-            get_forecast(gps_coords) {
-                const alerts = ["Clear skies for the next 48 hours. Ideal for harvesting.", "Warning: High humidity may increase fungal risk for mangoes.", "Expect strong winds. Secure any loose structures."];
-                return {
-                    "Temperature": `${Math.floor(Math.random() * 8) + 28}°C`,
-                    "Humidity": `${Math.floor(Math.random() * 26) + 60}%`,
-                    "Precipitation Chance (48h)": `${Math.floor(Math.random() * 81) + 10}%`,
-                    "Wind Speed": `${Math.floor(Math.random() * 11) + 5} km/h`,
-                    "Alert": alerts[Math.floor(Math.random() * alerts.length)]
-                };
-            }
-        };
-
-        const SimulatedPestDiagnosisModel = {
-            analyze_image(image_path, crop_type) {
-                const diseases = ["Healthy", "Thrips (थ्रिप्स)", "Powdery Mildew (भुरी)", "Sooty Mould (काळी बुरशी)"];
-                const diagnosis = diseases[Math.floor(Math.random() * diseases.length)];
-                if (diagnosis === "Healthy") {
-                    return {
-                        "Diagnosis": "Healthy (निरोगी)",
-                        "Confidence": "98.7%",
-                        "Recommendation": "No action needed. Continue regular monitoring."
-                    };
-                } else {
-                    return {
-                        "Diagnosis": `${diagnosis}`,
-                        "Confidence": `${Math.floor(Math.random() * 15) + 85}%`,
-                        "Recommendation": `Apply targeted organic pesticide for ${diagnosis}. Reduce pesticide usage by an estimated 40% with this targeted approach.`
-                    };
-                }
-            }
-        };
-        
-        const SimulatedSoilHealthModel = {
-            get_recommendations(gps_coords, crop_type) {
-                return {
-                    "Soil Type": "Lateritic (जांभी मृदा)",
-                    "pH": (Math.random() * (6.5 - 5.5) + 5.5).toFixed(1),
-                    "Deficiencies": "Nitrogen, Zinc",
-                    "Recommendation": `For ${crop_type}, apply 50kg/ha of Urea and 10kg/ha of Zinc Sulphate. Consider adding 5 tons/ha of farmyard manure to improve long-term soil health.`
-                };
-            }
-        };
-        
-        const SimulatedWaterManagementModel = {
-            get_irrigation_schedule(crop_type, crop_stage) {
-                const nextIrrigationDate = new Date();
-                nextIrrigationDate.setDate(nextIrrigationDate.getDate() + 2);
-                return {
-                    "Schedule": "Irrigate for 30 minutes every 3 days using drip system.",
-                    "Water Saved Estimate": "35%",
-                    "Next Irrigation": nextIrrigationDate.toISOString().split('T')[0]
-                };
+        const translations = {
+            en: {
+                getStarted: "Get Started", profile: "Profile", aboutUs: "About Us",
+                featuresTitle: "Your All-in-One Farming Toolkit",
+                featurePlantingText: "Get hyper-local, AI-driven recommendations on the perfect time to plant your crops, maximizing potential yield and minimizing climate-related risks.",
+                featureIrrigationText: "Based on real-time weather data and satellite analysis, our AI generates precise watering schedules to save water and ensure your crops are never thirsty.",
+                featurePestText: "Upload a photo of an affected leaf, and our AI will diagnose the issue, providing immediate, actionable treatment plans to protect your harvest.",
+                aboutTitle: "About AgriLocal", aboutText: "AgriLocal was born from a simple mission: to empower local farmers with the same advanced technology used by large agricultural corporations. We believe that by providing accessible, AI-driven insights, we can help build a more sustainable and profitable future for the farming communities that feed us all. Our platform is designed to be intuitive, hyper-local, and a true partner in your daily work.",
+                profileTitle: "Your Farm Profile", mainTitle: "Cultivating Insight, <br> <span class='text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-green-400 to-green-500'>Harvesting Success.</span>",
+                mainSubtitle: "AgriLocal is your AI co-pilot for the field. We combine satellite imagery with advanced AI to give you precise, actionable advice for your crops, right when you need it.",
+                dashboardTitle: "Your Farm Dashboard", satelliteTitle: "Satellite Farm Overview", welcomeTitle: "Welcome to AgriLocal",
+                formSubtitle: "Let's set up your farm profile to get personalized AI advice.", formNameLabel: "Your Name", formLocationLabel: "Your Location (City, State)",
+                formCropsLabel: "Your Main Crops (comma-separated)", formSubmitBtn: "Create My Profile & View Dashboard",
+                welcomeUser: (name) => `Welcome, ${name}!`, welcomeUserSubtitle: (location) => `Here is the latest analysis for your farm in ${location}.`,
+                cardPlantingTitle: "Planting Advisor", cardPlantingSub: "AI-driven planting dates.", cardIrrigationTitle: "Smart Irrigation", cardIrrigationSub: "Precise watering schedules.",
+                cardPestTitle: "Pest Diagnosis", cardPestSub: "Upload a photo for analysis.", cardMarketTitle: "Local Marketplace", cardMarketSub: "Sell produce to your community.",
+                satelliteHealthTitle: "Field Health Analysis", satelliteHealthSub: "Based on your main crops.", fieldStatusHealthy: "Healthy", fieldStatusModerate: "Moderate Stress", fieldStatusHigh: "High Stress",
+            },
+            mr: {
+                getStarted: "सुरु करा", profile: "प्रोफाइल", aboutUs: "आमच्याबद्दल",
+                featuresTitle: "तुमची सर्वसमावेशक शेती साधने",
+                featurePlantingText: "तुमची पिके लावण्यासाठी सर्वोत्तम वेळेबद्दल अत्यंत-स्थानिक, AI-आधारित शिफारси मिळवा, ज्यामुळे संभाव्य उत्पन्न वाढते आणि हवामानाशी संबंधित धोके कमी होतात.",
+                featureIrrigationText: "वास्तविक हवामान डेटा आणि उपग्रह विश्लेषणावर आधारित, आमचे AI अचूक पाणी देण्याचे वेळापत्रक तयार करते जेणेकरून पाण्याची बचत होईल आणि तुमची पिके कधीही तहानलेली राहणार नाहीत.",
+                featurePestText: "प्रभावित पानाचा फोटो अपलोड करा, आणि आमचे AI समस्येचे निदान करेल, तुमच्या कापणीचे संरक्षण करण्यासाठी त्वरित, कृती करण्यायोग्य उपचार योजना प्रदान करेल.",
+                aboutTitle: "ॲग्रीलोकल बद्दल", aboutText: "ॲग्रीलोकलचा जन्म एका साध्या ध्येयातून झाला आहे: स्थानिक शेतकऱ्यांना मोठ्या कृषी कंपन्यांप्रमाणेच प्रगत तंत्रज्ञानाने सक्षम करणे. आम्हाला विश्वास आहे की सुलभ, AI-आधारित अंतर्दृष्टी प्रदान करून, आम्ही आपल्या सर्वांना अन्न पुरवणाऱ्या शेतकरी समुदायांसाठी अधिक टिकाऊ आणि फायदेशीर भविष्य घडविण्यात मदत करू शकतो. आमचे प्लॅटफॉर्म अंतर्ज्ञानी, अत्यंत-स्थानिक आणि तुमच्या दैनंदिन कामात खरा भागीदार होण्यासाठी डिझाइन केलेले आहे.",
+                profileTitle: "तुमचे फार्म प्रोफाइल", mainTitle: "अंतरदृष्टी जोपासा, <br> <span class='text-transparent bg-clip-text bg-gradient-to-r from-green-300 via-green-400 to-green-500'>यश मिळवा.</span>",
+                mainSubtitle: "ॲग्रीलोकल हे तुमच्या शेतीसाठी AI सहाय्यक आहे. आम्ही उपग्रह प्रतिमा आणि प्रगत AI वापरून तुम्हाला तुमच्या पिकांसाठी अचूक आणि वेळेवर सल्ला देतो.",
+                dashboardTitle: "तुमचा फार्म डॅशबोर्ड", satelliteTitle: "उपग्रह फार्म आढावा", welcomeTitle: "ॲग्रीलोकल मध्ये आपले स्वागत आहे",
+                formSubtitle: "वैयक्तिक AI सल्ला मिळवण्यासाठी चला तुमचे फार्म प्रोफाइल सेट करूया.", formNameLabel: "तुमचे नाव", formLocationLabel: "तुमचे स्थान (शहर, राज्य)",
+                formCropsLabel: "तुमची मुख्य पिके (स्वल्पविरामाने वेगळी करा)", formSubmitBtn: "माझे प्रोफाइल तयार करा आणि डॅशबोर्ड पहा",
+                welcomeUser: (name) => `${name}, आपले स्वागत आहे!`, welcomeUserSubtitle: (location) => `${location} येथील तुमच्या शेताचे नवीनतम विश्लेषण येथे आहे.`,
+                cardPlantingTitle: "लागवड सल्लागार", cardPlantingSub: "AI-आधारित लागवडीच्या तारखा.", cardIrrigationTitle: "स्मार्ट सिंचन", cardIrrigationSub: "अचूक पाणी देण्याचे वेळापत्रक.",
+                cardPestTitle: "कीड निदान", cardPestSub: "विश्लेषणासाठी फोटो अपलोड करा.", cardMarketTitle: "स्थानिक बाजारपेठ", cardMarketSub: "तुमच्या समाजाला उत्पादन विका.",
+                satelliteHealthTitle: "शेत आरोग्य विश्लेषण", satelliteHealthSub: "तुमच्या मुख्य पिकांवर आधारित.", fieldStatusHealthy: "निरोगी", fieldStatusModerate: "मध्यम ताण", fieldStatusHigh: "उच्च ताण",
             }
         };
 
-        const SimulatedMarketAPI = {
-            get_prices(crop_type) {
-                 return {
-                    "Crop": crop_type,
-                    "Avg Price (Pune APMC)": `₹${Math.floor(Math.random() * 501) + 2000} / quintal`,
-                    "Avg Price (Mumbai APMC)": `₹${Math.floor(Math.random() * 501) + 2100} / quintal`,
-                    "Forecast (7 days)": "Prices expected to remain stable with a slight upward trend due to festive demand."
-                };
-            }
-        };
 
-        // --- Modal Control ---
+        // --- DOM Elements ---
+        const getStartedBtn = document.getElementById('get-started-btn');
+        const profileBtn = document.getElementById('profile-btn');
+        const landingPageDiv = document.getElementById('landing-page');
+        const appContainerDiv = document.getElementById('app-container');
+        const userGreetingDiv = document.getElementById('user-greeting');
+        const dashboardContentDiv = document.getElementById('dashboard-content');
         const modal = document.getElementById('modal');
         const modalContent = document.getElementById('modal-content');
         const modalTitle = document.getElementById('modal-title');
         const modalBody = document.getElementById('modal-body');
         const modalClose = document.getElementById('modal-close');
+        const modalBackdrop = document.getElementById('modal-backdrop');
+        const langEnBtn = document.getElementById('lang-en');
+        const langMrBtn = document.getElementById('lang-mr');
+        const mainHeader = document.getElementById('main-header');
 
-        function openModal() {
+        // --- Core App Logic ---
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            getStartedBtn.addEventListener('click', showProfileForm);
+            profileBtn.addEventListener('click', showUserProfile);
+            langEnBtn.addEventListener('click', () => switchLanguage('en'));
+            langMrBtn.addEventListener('click', () => switchLanguage('mr'));
+            document.getElementById('about-us-btn').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelector('#about-us').scrollIntoView();
+            });
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) closeModal();
+            });
+            modalClose.addEventListener('click', closeModal);
+
+            window.addEventListener('scroll', () => {
+                mainHeader.classList.toggle('scrolled', window.scrollY > 20);
+                
+                document.querySelectorAll('.revealable').forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top < window.innerHeight && rect.bottom >= 0) {
+                        el.classList.add('visible');
+                    }
+                });
+            });
+
+            switchLanguage('en');
+        });
+
+
+        function showProfileForm() {
+            const t = translations[currentLang];
+            const formHtml = `
+                <p class="text-center text-gray-400 mb-6 font-light">${t.formSubtitle}</p>
+                <form id="profile-form" class="space-y-4">
+                    <div>
+                        <label for="farmer-name" class="block text-sm font-medium text-gray-300 mb-1">${t.formNameLabel}</label>
+                        <input type="text" id="farmer-name" name="farmer-name" required class="form-input" placeholder="e.g., Radha More">
+                    </div>
+                    <div>
+                        <label for="farm-location" class="block text-sm font-medium text-gray-300 mb-1">${t.formLocationLabel}</label>
+                        <input type="text" id="farm-location" name="farm-location" required class="form-input" placeholder="e.g., Palghar, Maharashtra">
+                    </div>
+                    <div>
+                        <label for="farm-crops" class="block text-sm font-medium text-gray-300 mb-1">${t.formCropsLabel}</label>
+                        <input type="text" id="farm-crops" name="farm-crops" required class="form-input" placeholder="e.g., Rice, Mango, Cashew">
+                    </div>
+                    <button type="submit" class="w-full btn btn-primary mt-2">
+                        ${t.formSubmitBtn}
+                    </button>
+                </form>
+            `;
+            openModal(t.welcomeTitle, formHtml);
+
+            document.getElementById('profile-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                user.name = document.getElementById('farmer-name').value;
+                user.location = document.getElementById('farm-location').value;
+                user.crops = document.getElementById('farm-crops').value.split(',').map(crop => crop.trim());
+                
+                closeModal();
+                initializeApp();
+            });
+        }
+        
+        function initializeApp() {
+            landingPageDiv.classList.add('hidden');
+            appContainerDiv.classList.remove('hidden');
+            
+            getStartedBtn.classList.add('hidden');
+            profileBtn.classList.remove('hidden');
+            document.getElementById('about-us-btn').classList.add('hidden');
+
+            const t = translations[currentLang];
+            userGreetingDiv.innerHTML = `<h1 class="text-4xl text-white font-bold">${t.welcomeUser(user.name)}</h1><p class="text-lg text-gray-300 mt-2 font-light">${t.welcomeUserSubtitle(user.location)}</p>`;
+            dashboardContentDiv.classList.remove('hidden');
+            renderDashboard();
+        }
+
+        function showUserProfile() {
+            const t = translations[currentLang];
+            const profileHtml = `
+                <div class="space-y-4 text-gray-300">
+                    <div>
+                        <p class="text-sm font-medium text-gray-400">${t.formNameLabel}</p>
+                        <p class="text-lg text-white">${user.name}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-400">${t.formLocationLabel}</p>
+                        <p class="text-lg text-white">${user.location}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-400">${t.formCropsLabel}</p>
+                        <p class="text-lg text-white">${user.crops.join(', ')}</p>
+                    </div>
+                </div>
+            `;
+            openModal(t.profileTitle, profileHtml);
+        }
+
+        function renderDashboard() {
+            const mainGrid = appContainerDiv.querySelector('.grid');
+            if (!mainGrid) return;
+            const t = translations[currentLang];
+            mainGrid.innerHTML = `
+                <div id="planting-card" class="glass-card p-6 cursor-pointer flex flex-col items-center text-center">
+                    <div class="mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--primary-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20h10"/><path d="M10 20c0-3.3 1-6 5-8"/><path d="M12 9a7 7 0 1 0-7-7"/><path d="M12 9c0 4.4-4 8-6 8"/></svg></div>
+                    <h3 class="text-xl font-bold text-white mb-1">${t.cardPlantingTitle}</h3><p class="text-gray-400 mt-1 text-sm font-light">${t.cardPlantingSub}</p>
+                </div>
+                <div id="irrigation-card" class="glass-card p-6 cursor-pointer flex flex-col items-center text-center">
+                    <div class="mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M8 19v1"/><path d="M8 14v1"/><path d="M16 19v1"/><path d="M16 14v1"/><path d="M12 21v1"/><path d="M12 16v1"/></svg></div>
+                    <h3 class="text-xl font-bold text-white mb-1">${t.cardIrrigationTitle}</h3><p class="text-gray-400 mt-1 text-sm font-light">${t.cardIrrigationSub}</p>
+                </div>
+                <div id="pest-card" class="glass-card p-6 cursor-pointer flex flex-col items-center text-center">
+                    <div class="mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m8 2 1.88 1.88"/><path d="M14.12 3.88 16 2"/><path d="M9 7.13v-1a3.003 3.003 0 1 1 6 0v1"/><path d="M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6"/><path d="M12 20v-9"/><path d="M6.53 9C4.6 8.8 3 7.1 3 5"/><path d="M20.97 9c-.1-2.1-1.6-3.8-3.5-4"/><path d="M7 13h10"/><path d="M7 16h10"/></svg></div>
+                    <h3 class="text-xl font-bold text-white mb-1">${t.cardPestTitle}</h3><p class="text-gray-400 mt-1 text-sm font-light">${t.cardPestSub}</p>
+                </div>
+                <div id="market-card" class="glass-card p-6 cursor-pointer flex flex-col items-center text-center">
+                    <div class="mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M12 22V7"/><path d="M4 12H2"/><path d="M20 12h2"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M15 7H9"/><path d="M18 12h-2"/><path d="M8 12H6"/></svg></div>
+                    <h3 class="text-xl font-bold text-white mb-1">${t.cardMarketTitle}</h3><p class="text-gray-400 mt-1 text-sm font-light">${t.cardMarketSub}</p>
+                </div>
+            `;
+            
+            const fieldStatusMap = {
+                Healthy: t.fieldStatusHealthy,
+                'Moderate Stress': t.fieldStatusModerate,
+                'High Stress': t.fieldStatusHigh,
+            };
+            
+            document.getElementById('satellite-analysis').innerHTML = `
+                <h3 class="font-bold text-lg text-white">${t.satelliteHealthTitle}</h3>
+                <p class="text-sm text-gray-400 mb-4 font-light">${t.satelliteHealthSub}</p>
+                <div class="space-y-3">
+                    ${user.crops && user.crops.length > 0 ? user.crops.map((crop, i) => {
+                        const statusKey = ['Healthy', 'Moderate Stress', 'High Stress'][i % 3];
+                        const statusText = fieldStatusMap[statusKey];
+                        return `
+                        <div class="flex items-center gap-3">
+                            <div class="w-5 h-5 rounded-full ${['bg-green-500', 'bg-yellow-500', 'bg-red-500'][i % 3]} border-2 border-slate-900 shadow-md"></div>
+                            <span class="text-gray-300">Field ${String.fromCharCode(65 + Math.floor(i/2))}-${i%2 + 1} (${crop}): <strong class="${['text-green-400', 'text-yellow-400', 'text-red-400'][i % 3]} font-medium">${statusText}</strong></span>
+                        </div>
+                    `}).join('') : `<p class="text-gray-400 font-light">Your crop analysis will appear here.</p>`}
+                </div>
+            `;
+            
+            document.getElementById('planting-card').addEventListener('click', handlePlantingAdvisor);
+            document.getElementById('irrigation-card').addEventListener('click', handleIrrigation);
+            document.getElementById('pest-card').addEventListener('click', handlePestDiagnosis);
+            document.getElementById('market-card').addEventListener('click', handleMarketplace);
+        }
+
+        // --- API & Service Functions ---
+        
+        async function getWeatherData(location) {
+            if (!WEATHER_API_KEY) return null;
+            const url = `https://api.weatherapi.com/v1/forecast.json?key=${WEATHER_API_KEY}&q=${location}&days=3`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Weather data not found.');
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error("Weather API call failed:", error);
+                return null;
+            }
+        }
+
+        async function callGemini(prompt, imageBase64 = null) {
+             if (!GEMINI_API_KEY) {
+                const errorMessage = "Error: Gemini API key is missing. Please add your API key to the script.";
+                console.error(errorMessage);
+                return `<p class="text-red-400 font-semibold">${errorMessage}</p><p class="text-gray-400 text-sm mt-2">You can get a free key from Google AI Studio.</p>`;
+            }
+            
+            const model = "gemini-1.5-flash-latest";
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+            
+            const parts = [{ text: prompt }];
+            if (imageBase64) {
+                parts.push({ inline_data: { mime_type: "image/jpeg", data: imageBase64 } });
+            }
+
+            const payload = {
+                contents: [{
+                    parts: parts
+                }]
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+
+                if (!response.ok) {
+                    const errorDetails = data?.error?.message || `HTTP error! status: ${response.status}`;
+                    throw new Error(errorDetails);
+                }
+                
+                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!text) {
+                    const finishReason = data?.candidates?.[0]?.finishReason;
+                    if (finishReason === 'SAFETY') {
+                         const safetyRatings = JSON.stringify(data?.candidates?.[0]?.safetyRatings, null, 2);
+                         throw new Error(`The AI response was blocked for safety reasons. Details: ${safetyRatings}`);
+                    }
+                    throw new Error(`Invalid or empty AI response. Finish Reason: ${finishReason || 'Unknown'}.`);
+                }
+                
+                return text;
+
+            } catch (error) {
+                console.error("Gemini API call failed:", error);
+                return `<p class="text-red-400 font-semibold">Error fetching AI response:</p><p class="text-red-400 text-sm mt-1">${error.message}</p>`;
+            }
+        }
+        
+        // --- Feature Handlers ---
+        async function handlePlantingAdvisor() {
+            openModal(translations[currentLang].cardPlantingTitle, '<div class="loader"></div>');
+            const prompt = `I am a farmer in ${user.location}. My main crops are ${user.crops.join(', ')}. Provide a simple, actionable planting recommendation for each crop in a clear, structured format using markdown.`;
+            const aiResponse = await callGemini(prompt);
+            modalBody.innerHTML = `<div class="prose-output">${marked.parse(aiResponse)}</div>`;
+        }
+
+        async function handleIrrigation() {
+            openModal(translations[currentLang].cardIrrigationTitle, '<div class="loader"></div>');
+            
+            const weatherData = await getWeatherData(user.location);
+            let weatherInfo = "Current weather data is unavailable.";
+            if (weatherData) {
+                const current = weatherData.current;
+                weatherInfo = `The current weather is ${current.temp_c}°C, ${current.humidity}% humidity, with ${current.condition.text}. The wind is ${current.wind_kph} kph.`;
+            }
+
+            const prompt = `As an agricultural AI, create a smart irrigation schedule for a farmer in ${user.location} with crops: ${user.crops.join(', ')}. One field is showing signs of 'High Stress' according to satellite data. ${weatherInfo} Provide a precise, actionable plan for today and tomorrow for each crop, with clear markdown headings.`;
+            const aiResponse = await callGemini(prompt);
+            modalBody.innerHTML = `<div class="prose-output">${marked.parse(aiResponse)}</div>`;
+        }
+        
+        function handlePestDiagnosis() {
+            const body = `
+                <p class="text-gray-400 mb-4 font-light">Upload a photo of the affected crop leaf for an instant AI analysis.</p>
+                <div class="flex flex-col items-center">
+                    <input type="file" id="pest-upload" accept="image/*" class="hidden">
+                    <label for="pest-upload" class="w-full text-center btn btn-primary cursor-pointer">Upload Photo</label>
+                    <div id="diagnosis-result" class="w-full mt-4"></div>
+                </div>
+            `;
+            openModal(translations[currentLang].cardPestTitle, body);
+
+            document.getElementById('pest-upload').addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const base64Image = reader.result.split(',')[1];
+                    const resultDiv = document.getElementById('diagnosis-result');
+                    resultDiv.innerHTML = '<div class="loader"></div>';
+                    const prompt = `You are an expert plant pathologist. Analyze this image of a crop leaf from a farm in Maharashtra, India. Identify the plant and any disease or pest present. Provide a diagnosis, confidence score, and a simple, actionable treatment plan using organic or readily available methods suitable for a small-scale local farmer. Format the response clearly with markdown headings.`;
+                    const aiResponse = await callGemini(prompt, base64Image);
+                    resultDiv.innerHTML = `<div class="prose-output">${marked.parse(aiResponse)}</div>`;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function handleMarketplace() {
+            const body = `
+                <div class="text-gray-300">
+                    <h4 class="text-xl font-bold text-white mb-3">Simulated New Orders</h4>
+                    <div class="space-y-3">
+                         <div class="glass-card p-3 flex justify-between items-center"><p><strong>'Green Leaf Cafe'</strong> wants <strong>5kg ${user.crops[1] || 'Veggies'}</strong></p><button class="bg-green-600 text-white text-sm font-bold py-1 px-3 rounded-md hover:bg-green-700">Accept</button></div>
+                         <div class="glass-card p-3 flex justify-between items-center"><p><strong>Asha Mehta</strong> wants <strong>2kg ${user.crops[2] || 'Greens'}</strong></p><button class="bg-green-600 text-white text-sm font-bold py-1 px-3 rounded-md hover:bg-green-700">Accept</button></div>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mt-6 mb-3">Your Current Listings</h4>
+                    <div class="space-y-2 glass-card p-4">
+                        ${user.crops.map(crop => `<p>${crop} - ₹${(Math.random() * 50 + 30).toFixed(0)} / kg</p>`).join('')}
+                    </div>
+                </div>
+            `;
+            openModal(translations[currentLang].cardMarketTitle, body);
+        }
+
+        // --- Language Switcher Logic ---
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+
+            const t = translations[lang];
+
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (t[key]) {
+                    el.innerHTML = t[key];
+                }
+            });
+            
+            if (lang === 'en') {
+                langEnBtn.classList.add('active');
+                langMrBtn.classList.remove('active');
+            } else {
+                langEnBtn.classList.remove('active');
+                langMrBtn.classList.add('active');
+            }
+            
+            if (user.name) {
+                userGreetingDiv.innerHTML = `<h1 class="text-4xl text-white font-bold">${t.welcomeUser(user.name)}</h1><p class="text-lg text-gray-300 mt-2 font-light">${t.welcomeUserSubtitle(user.location)}</p>`;
+                renderDashboard();
+            }
+        }
+
+        // --- Modal Control ---
+        function openModal(title, body) {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+
+            modalTitle.innerHTML = title;
+            modalBody.innerHTML = body;
             modal.classList.remove('hidden');
             setTimeout(() => {
                 modal.classList.remove('opacity-0');
@@ -218,151 +765,14 @@
         }
 
         function closeModal() {
+            const modal = document.getElementById('modal');
+            const modalContent = document.getElementById('modal-content');
             modal.classList.add('opacity-0');
             modalContent.classList.add('scale-95');
             setTimeout(() => {
                 modal.classList.add('hidden');
-                modalBody.innerHTML = ''; // Clear content on close
-            }, 250);
+            }, 300);
         }
-
-        modalClose.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-
-        // --- UI Rendering Functions ---
-        function renderKeyValue(data) {
-            let html = '<div class="space-y-4">';
-            for (const [key, value] of Object.entries(data)) {
-                html += `
-                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <p class="font-semibold text-gray-500 text-sm">${key.replace(/_/g, ' ')}</p>
-                        <p class="text-lg font-medium text-gray-800">${value}</p>
-                    </div>
-                `;
-            }
-            html += '</div>';
-            return html;
-        }
-
-        function createSelectionForm(title, items, submitCallback) {
-            let optionsHtml = items.map((item, index) => `<option value="${index}">${item}</option>`).join('');
-            
-            modalTitle.innerText = title;
-            modalBody.innerHTML = `
-                <div class="space-y-4">
-                    <p class="text-gray-600">Please select a crop to get started.</p>
-                    <select id="crop-selector" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                        ${optionsHtml}
-                    </select>
-                    <div id="additional-inputs"></div>
-                    <button id="form-submit-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">Get Report</button>
-                </div>
-            `;
-            openModal();
-
-            const submitBtn = document.getElementById('form-submit-btn');
-            submitBtn.addEventListener('click', () => {
-                const selector = document.getElementById('crop-selector');
-                const selectedIndex = selector.value;
-                const selectedCrop = items[selectedIndex];
-                submitCallback(selectedCrop);
-            });
-            
-            return document.getElementById('additional-inputs');
-        }
-
-        // --- Event Handlers ---
-        document.getElementById('weather-card').addEventListener('click', () => {
-            modalTitle.innerText = 'Hyper-Local Weather Report';
-            const forecast = SimulatedWeatherAPI.get_forecast(user.gps_coords);
-            modalBody.innerHTML = renderKeyValue(forecast);
-            openModal();
-        });
-
-        document.getElementById('pest-card').addEventListener('click', () => {
-            const additionalInputsContainer = createSelectionForm('Pest/Disease Diagnosis', user.crops, (selectedCrop) => {
-                const imagePath = document.getElementById('image-path-input').value || 'photo.jpg';
-                const result = SimulatedPestDiagnosisModel.analyze_image(imagePath, selectedCrop);
-                modalTitle.innerText = 'Diagnosis Report';
-                modalBody.innerHTML = renderKeyValue(result);
-            });
-            additionalInputsContainer.innerHTML = `
-                <label for="image-path-input" class="block text-sm font-medium text-gray-700 mt-4">Simulate Image Upload:</label>
-                <input type="text" id="image-path-input" placeholder="/sdcard/DCIM/photo.jpg" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                <p class="text-xs text-gray-500 mt-1">In a real app, this would be a file upload button.</p>
-            `;
-        });
-        
-        document.getElementById('soil-card').addEventListener('click', () => {
-            createSelectionForm('Soil Health Analytics', user.crops, (selectedCrop) => {
-                const result = SimulatedSoilHealthModel.get_recommendations(user.gps_coords, selectedCrop);
-                modalTitle.innerText = 'Soil Health Report';
-                modalBody.innerHTML = renderKeyValue(result);
-            });
-        });
-
-        document.getElementById('irrigation-card').addEventListener('click', () => {
-            const additionalInputsContainer = createSelectionForm('Irrigation Management', user.crops, (selectedCrop) => {
-                const stage = document.getElementById('crop-stage-input').value || 'vegetative';
-                const result = SimulatedWaterManagementModel.get_irrigation_schedule(selectedCrop, stage);
-                modalTitle.innerText = 'Smart Irrigation Plan';
-                modalBody.innerHTML = renderKeyValue(result);
-            });
-            additionalInputsContainer.innerHTML = `
-                <label for="crop-stage-input" class="block text-sm font-medium text-gray-700 mt-4">Enter Crop Stage:</label>
-                <input type="text" id="crop-stage-input" placeholder="e.g., vegetative, flowering" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-            `;
-        });
-
-        document.getElementById('market-card').addEventListener('click', () => {
-            createSelectionForm('Market Prices & Forecast', user.crops, (selectedCrop) => {
-                const result = SimulatedMarketAPI.get_prices(selectedCrop);
-                modalTitle.innerText = 'Market Intelligence Report';
-                modalBody.innerHTML = renderKeyValue(result);
-            });
-        });
-
-        document.getElementById('drone-card').addEventListener('click', () => {
-            modalTitle.innerText = 'Book Drone-as-a-Service';
-            modalBody.innerHTML = `
-                <div class="space-y-4">
-                    <p class="text-gray-600">Select a service and enter the area to book.</p>
-                    <select id="service-selector" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                        <option value="1">Aerial Crop Health Survey (Multispectral)</option>
-                        <option value="2">Precision Pesticide Spraying</option>
-                        <option value="3">Precision Fertilizer Spraying</option>
-                    </select>
-                    <input type="number" id="area-input" placeholder="Enter area in acres" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
-                    <button id="book-drone-btn" class="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition-colors">Confirm Booking</button>
-                    <div id="booking-confirmation" class="hidden mt-4 p-4 bg-blue-50 text-blue-800 border border-blue-200 rounded-lg"></div>
-                </div>
-            `;
-            openModal();
-
-            document.getElementById('book-drone-btn').addEventListener('click', () => {
-                const area = document.getElementById('area-input').value;
-                const serviceSelector = document.getElementById('service-selector');
-                const serviceName = serviceSelector.options[serviceSelector.selectedIndex].text;
-                const confirmationDiv = document.getElementById('booking-confirmation');
-
-                if (area && parseFloat(area) > 0) {
-                    confirmationDiv.innerHTML = `
-                        <h4 class="font-bold">Booking Confirmed!</h4>
-                        <p>Service: <strong>${serviceName}</strong> for <strong>${area} acres</strong>.</p>
-                        <p class="mt-2">A local DaaS provider from your FPO network will contact you within 24 hours. This pay-per-use model avoids high hardware costs.</p>
-                    `;
-                    confirmationDiv.classList.remove('hidden');
-                } else {
-                    confirmationDiv.innerHTML = '<p class="text-red-600">Please enter a valid area.</p>';
-                    confirmationDiv.classList.remove('hidden');
-                }
-            });
-        });
-
     </script>
 </body>
 </html>
