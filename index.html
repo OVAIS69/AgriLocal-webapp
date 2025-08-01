@@ -245,7 +245,31 @@
 
     <div class="relative min-h-screen">
         <!-- Header -->
-        <header id="main-header" class="py-3"> 
+        <header id="main-header" class="py-3">
+    <nav class="flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center gap-3">
+            </div>
+
+        <button id="mobile-menu-button" class="md:hidden text-white focus:outline-none">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+
+        <div class="hidden md:flex items-center gap-4" id="desktop-nav-links">
+            <a href="#about-us" id="about-us-btn" class="text-white hover:text-green-300 transition-colors font-medium" data-lang-key="aboutUs">About Us</a>
+            <button id="get-started-btn" class="btn btn-ghost" data-lang-key="getStarted">Get Started</button>
+            <button id="profile-btn" class="btn btn-ghost hidden" data-lang-key="profile">Profile</button>
+        </div>
+    </nav>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-gray-900/90 backdrop-blur-sm py-4">
+        <div class="flex flex-col items-center space-y-4">
+            <a href="#about-us" class="text-white hover:text-green-300 transition-colors font-medium py-2" data-lang-key="aboutUs">About Us</a>
+            <button class="btn btn-ghost w-auto px-6 py-2" data-lang-key="getStarted">Get Started</button>
+            <button class="btn btn-ghost hidden w-auto px-6 py-2" data-lang-key="profile">Profile</button>
+        </div>
+    </div>
             <nav class="flex justify-between items-center max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center gap-3">
                     <svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -372,6 +396,15 @@
     </div>
 
     <script>
+         document.addEventListener('DOMContentLoaded', () => {
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
         // --- App State & Configuration ---
         const user = {};
         let currentLang = 'en';
