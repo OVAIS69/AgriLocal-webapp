@@ -291,6 +291,10 @@
                 <p class="mt-6 max-w-2xl mx-auto text-lg text-gray-300 animate-slideInUp font-light" style="animation-delay: 0.3s;" data-lang-key="mainSubtitle">
                     AgriLocal is your AI co-pilot for the field. We combine satellite imagery with advanced AI to give you precise, actionable advice for your crops, right when you need it.
                 </p>
+                <!-- New Get Started button added here -->
+<button id="main-get-started-btn" class="btn btn-primary mt-8 animate-slideInUp" style="animation-delay: 0.5s;" data-lang-key="getStarted">
+    Get Started
+</button>
             </main>
 
             <!-- Features Section -->
@@ -494,6 +498,7 @@
             });
 
             switchLanguage('en');
+            document.getElementById('main-get-started-btn').addEventListener('click', showProfileForm);
         });
 
 
